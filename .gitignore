@@ -1,0 +1,11 @@
+# Arquivos gerados automaticamente
+node_modules/
+dist/
+build/
+
+# Arquivos temporários
+*.log
+*.tmp
+
+# Dados sensíveis
+.env
