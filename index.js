@@ -1,9 +1,13 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { getPhoneNumberAndSMS } = require('./getPhoneNumberAndSMS');
 require('dotenv').config();
 
-const USERNAME = '41rdg6br';
+const USERNAME = 'r0dr1g0s3cr3t';
 const PASSWORD = process.env.PASSWORD;
+
+// Add the stealth plugin to puppeteer
+puppeteer.use(StealthPlugin());
 
 (async () => {
   const browser = await puppeteer.launch({
@@ -26,49 +30,48 @@ const PASSWORD = process.env.PASSWORD;
   await page.type('input[name="Username"]', USERNAME);
 
   console.log('Preenchendo a senha...');
-  await page.type('input[name="Passwd"]', PASSWORD);
-  await page.type('input[name="ConfirmPasswd"]', PASSWORD);
+ 
+  await page.type('#passwd > div.aCsJod.oJeWuf > div > div.Xb9hP > input', 's3cr3tP@ssw0rd');
 
+  console.log('Preenchendo a senha...');
+
+  await page.type('input[name="ConfirmPasswd"]', 's3cr3tP@ssw0rd');
+
+  console.log('Confirmando a senha...');  
   console.log('Clicando em próximo...');
-  // Esperar que o botão seja carregado
+
   await page.waitForSelector('#accountDetailsNext > div > button > span');
-
-  // Obter o botão usando o seletor
   const button = await page.$('#accountDetailsNext > div > button > span');
-
-  // Clicar no botão
   await button.click();
 
   console.log('Preenchendo o número de telefone...');
-  await page.waitForSelector('#phoneNumberId');
-  const getPhoneNumber = await getPhoneNumberAndSMS();
-  // const phoneNumber = getPhoneNumber.phoneNumber;
-  // console.log(phoneNumber, 'Carregando numero...')
-  await page.type('#phoneNumberId', '11946540606');
+  try {
+    await page.waitForSelector('#phoneNumberId');
+    const getPhoneNumber = await getPhoneNumberAndSMS();
+    const phoneNumber = getPhoneNumber.phoneNumber;
+    console.log(phoneNumber, 'Phone Number');
+  } catch (error) {
+    console.error('Error occurred while getting phone number:', error);
+  }
+  
+  await page.type('#phoneNumberId', '41999999666');
   await page.click('button[jsname="LgbsSe"]'); // Confirma o número
-  // await page.waitForFunction('document.querySelector("#phoneNumberId").value.length > 0');
 
-  // Lê o valor do campo de entrada e retorna para o código do Puppeteer
-  const phoneNumber = await page.evaluate(() => {
-    return document.querySelector('#phoneNumberId').value;
-  });
-
-  // Usa o valor do campo de entrada no restante do código
-  console.log(phoneNumber);
   console.log('Aguardando a verificação do número...');
-  
-  // await page.waitForSelector('#code'); // Aguarda o código de verificação ser digitado
 
-  // const getSMS = await getPhoneNumberAndSMS();
-  // const verificationCode = getSMS.smsMessage
-  // await page.waitForSelector('#code', { timeout: 100000 });
+  // Espera a página ser carregada após clicar em "Próximo"
+  await page.waitForNavigation();
 
-  // await page.type('#code', '986543'); // Digita o código de verificação/
-  // await page.click('button[jsname="LgbsSe"]'); // Clica em "Verificar"
-  console.log('Aguardando a verificação do número...');
-  await page.waitForNavigation(); // aguarda a página ser carregada após clicar em "Próximo"
-  
-  // Continua a execução do código aqui...
+  console.log('Preenche o campo com o código de verificação...');
+  /* PREENCHER O CAMPO */
+
+  try {
+    const getSMSMessage = await getPhoneNumberAndSMS();
+    const smsMessage = getSMSMessage.smsMessage;
+    console.log(smsMessage, 'SMS Message');
+  } catch (error) {
+    console.error('Error occurred while getting sms message:', error);
+  }
 
   // Preenche o mês
   await page.waitForSelector('#month');
@@ -86,14 +89,31 @@ const PASSWORD = process.env.PASSWORD;
   await page.waitForSelector('#gender');
   await page.click('#gender');
   await page.waitForSelector('#gender-menu');
+  await page.waitForTimeout(6000); // espera 6 segundos
   await page.click('#gender-menu [data-value="male"]'); // Exemplo: masculino
 
+  await page.waitForSelector('#view_container > div > div > div.pwWryf.bxPAYd > div > div.zQJV3 > div > div.qhFLie > div > div > button > span');
+  const nextButton = await page.$('#view_container > div > div > div.pwWryf.bxPAYd > div > div.zQJV3 > div > div.qhFLie > div > div > button > span');
+  await nextButton.click();
+  
   console.log('Finalizando a criação da conta...');
   await page.waitForNavigation(); // Aguarda a página ser carregada
+  await page.waitForSelector('#view_container > div > div > div.pwWryf.bxPAYd > div > div.zQJV3 > div.dG5hZc > div.daaWTb > div > div > button > span');
+  const skipButton = await page.$('#view_container > div > div > div.pwWryf.bxPAYd > div > div.zQJV3 > div.dG5hZc > div.daaWTb > div > div > button > span');
+  await skipButton.click();
+
+  // await page.waitForSelector('#view_container > div > div > div.pwWryf.bxPAYd > div > div.WEQkZc > div > form > span > section:nth-child(3) > div > div > div:nth-child(1) > div.ci67pc > div > div > div.enBDyd > div > input');
+  // const checkbox = await page.$('#view_container > div > div > div.pwWryf.bxPAYd > div > div.WEQkZc > div > form > span > section:nth-child(3) > div > div > div:nth-child(1) > div.ci67pc > div > div > div.enBDyd > div > input');
+  // await checkbox.click();
+   
   await page.waitForSelector('#termsofserviceNext'); // Aguarda o botão "Aceitar" aparecer
   await page.click('#termsofserviceNext'); // Clica em "Aceitar"
   await page.waitForSelector('#privacyPolicyNext'); // Aguarda o botão "Aceitar" aparecer
   await page.click('#privacyPolicyNext'); // Clica em "Aceitar"
+
+  // await page.waitForSelector('#view_container > div > div > div.pwWryf.bxPAYd > div > div.zQJV3 > div > div.qhFLie > div > div > button > span');
+  // const createAccountButton = await page.$('#view_container > div > div > div.pwWryf.bxPAYd > div > div.zQJV3 > div > div.qhFLie > div > div > button > span');
+  // await createAccountButton.click();
 
   console.log('Conta criada com sucesso!');
   await browser.close(); // Fecha o navegador
